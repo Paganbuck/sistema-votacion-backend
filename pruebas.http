@@ -1,0 +1,17 @@
+### Probar voto por candidato 1
+POST http://localhost:8080/api/v1/votacion/votar/1
+
+### Probar voto por candidato 2
+POST http://localhost:8080/api/v1/votacion/votar/2
+
+### Probar voto por candidato 3
+POST http://localhost:8080/api/v1/votacion/votar/3
+
+POST http://localhost:8080/api/v1/votacion/votar/3/10203040
+
+POST http://localhost:8080/api/v1/votacion/votar/3/10203050
+
+POST http://localhost:8080/api/v1/votacion/votar/3/10203150
+
+POST http://localhost:8080/api/v1/votacion/votar/3/10203152
+

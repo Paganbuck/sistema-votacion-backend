@@ -1,0 +1,9 @@
+package com.sistema_votacion.app.services;
+
+import java.util.List;
+import java.util.Map;
+
+public interface VotacionService {
+    Object registrarVoto(Long candidatoId, String documentoVotante);
+    List<Map<String, Object>> obtenerResultados();
+}
