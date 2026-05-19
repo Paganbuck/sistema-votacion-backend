@@ -149,7 +149,7 @@ function App() {
         {pantalla === 'TARJETON' && (
           <div className="w-full animate-in fade-in slide-in-from-bottom-6 duration-400 max-w-5xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Tarjetón Electoral Presidencial</h2>
+              <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Tarjetón Electoral</h2>
               <p className="text-slate-500 mt-2 text-sm">Seleccione la opción de su preferencia. Su voto es secreto, seguro y totalmente anónimo.</p>
             </div>
 
