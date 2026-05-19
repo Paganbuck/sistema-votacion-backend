@@ -1,9 +1,12 @@
 package com.sistema_votacion.app.controllers;
 
 import com.sistema_votacion.app.services.VotacionService;
+import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/votacion")
@@ -25,4 +28,20 @@ public class VotacionController {
         // Retorna una lista con el nombre de cada candidato y su total de votos
         return ResponseEntity.ok(votacionService.obtenerResultados());
     }
+
+    @GetMapping("/verificar/{documento}")
+    public ResponseEntity<?> verificarVotante(@PathVariable String documento) {
+    // Delegamos la verificación al servicio
+    boolean yaVoto = votacionService.verificarSiYaVoto(documento);
+    
+    Map<String, Object> respuesta = new HashMap<>();
+    if (yaVoto) {
+        respuesta.put("estado", 403);
+        respuesta.put("mensaje", "Usted ya ha ejercido su derecho al voto.");
+    } else {
+        respuesta.put("estado", 200);
+        respuesta.put("mensaje", "Votante habilitado.");
+    }
+    return ResponseEntity.ok(respuesta);
+}
 }

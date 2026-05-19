@@ -15,10 +15,6 @@ public class Voto {
     @JoinColumn(name = "candidato_id", nullable = false)
     private Candidato candidato;
 
-    // Este es el campo clave para evitar fraude
-    @Column(unique = true, nullable = false) 
-    private String identificadorVotante;
-
     private LocalDateTime fechaVoto;
 
     @Column(length = 128) 

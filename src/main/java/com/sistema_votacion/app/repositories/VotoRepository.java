@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface VotoRepository extends JpaRepository<Voto, Long> {
-    boolean existsByIdentificadorVotante(String identificadorVotante);
+    
+    // Este método se queda para que funcione la pantalla de porcentajes
     long countByCandidatoId(Long candidatoId);
 }

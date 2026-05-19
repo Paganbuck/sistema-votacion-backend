@@ -6,4 +6,5 @@ import java.util.Map;
 public interface VotacionService {
     Object registrarVoto(Long candidatoId, String documentoVotante);
     List<Map<String, Object>> obtenerResultados();
+    boolean verificarSiYaVoto(String documentoVotante);
 }
