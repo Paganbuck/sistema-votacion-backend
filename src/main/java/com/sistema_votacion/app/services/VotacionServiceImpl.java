@@ -58,16 +58,31 @@ public class VotacionServiceImpl implements VotacionService {
     
     @Override
     public List<Map<String, Object>> obtenerResultados() {
-        return candidatoRepository.findAll().stream().map(c -> {
+    // 1. Obtener todos los candidatos de la base de datos
+    List<com.sistema_votacion.app.models.Candidato> candidatos = candidatoRepository.findAll();
+    
+    // 2. Calcular el total acumulado de votos en el sistema para sacar los porcentajes
+    long totalVotosGlobales = votoRepository.count();
+
+    // 3. Mapear cada candidato con sus estadísticas calculadas
+    return candidatos.stream().map(c -> {
         Map<String, Object> resultado = new HashMap<>();
         
-        // CORRECCIÓN CLAVE: Enviar el ID al frontend
-        resultado.put("id", c.getId()); 
+        long votosCandidato = votoRepository.countByCandidatoId(c.getId());
         
+        resultado.put("id", c.getId()); 
         resultado.put("nombre", c.getNombre());
-        resultado.put("votos", votoRepository.countByCandidatoId(c.getId()));
+        resultado.put("votos", votosCandidato);
         resultado.put("partidoPolitico", c.getPartidoPolitico());
         resultado.put("fotoUrl", c.getFotoUrl());
+        
+        // Calcular el porcentaje matemático de forma segura (evitando división por cero)
+        double porcentaje = (totalVotosGlobales > 0) 
+            ? ((double) votosCandidato / totalVotosGlobales) * 100 
+            : 0.0;
+            
+        // Redondear a un decimal (ej: 33.3)
+        resultado.put("porcentaje", Math.round(porcentaje * 10.0) / 10.0);
         
         return resultado;
     }).collect(Collectors.toList());
