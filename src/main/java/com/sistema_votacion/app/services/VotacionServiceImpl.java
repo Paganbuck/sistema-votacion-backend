@@ -5,14 +5,16 @@ import com.sistema_votacion.app.models.VotanteRegistrado;
 import com.sistema_votacion.app.repositories.CandidatoRepository;
 import com.sistema_votacion.app.repositories.VotoRepository;
 import com.sistema_votacion.app.repositories.VotanteRegistradoRepository;
-import com.sistema_votacion.app.utils.ApiResponse;
+import com.sistema_votacion.app.dtos.ApiResponse;
 import com.sistema_votacion.app.utils.HashUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.transaction.annotation.Isolation;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 @Service
 public class VotacionServiceImpl implements VotacionService {
@@ -27,73 +29,65 @@ public class VotacionServiceImpl implements VotacionService {
     private VotanteRegistradoRepository votanteRegistradoRepository;
 
     @Override
-    @Transactional
-    public Object registrarVoto(Long candidatoId, String documentoVotante) {
-        // 1. Validar duplicidad usando el repositorio de control independiente
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public synchronized Object registrarVoto(Long candidatoId, String documentoVotante, String ip, String userAgent) {
+        
+        // 1. VERIFICACIÓN CRÍTICA EN BASE DE DATOS (Doble voto)
         if (votanteRegistradoRepository.existsById(documentoVotante)) {
-            throw new RuntimeException("Usted ya ha ejercido su derecho al voto.");
+            throw new IllegalStateException("Intento de fraude detectado: El ciudadano ya ejerció su derecho al voto.");
         }
 
-        // 2. Si no ha votado, buscamos el candidato y guardamos de forma aislada
+        // 2. VALIDAR EXISTENCIA DEL CANDIDATO
         return candidatoRepository.findById(candidatoId).map(candidato -> {
             
-            // A) Registrar al votante en su tabla de control exclusiva
+            // A) Registrar consumo inmediato del derecho al voto
             VotanteRegistrado votante = new VotanteRegistrado();
             votante.setDocumento(documentoVotante);
             votanteRegistradoRepository.save(votante);
 
-            // B) Guardar el voto de manera 100% anónima (sin la cédula en texto plano)
-            Voto nuevoVoto = new Voto();
-            nuevoVoto.setCandidato(candidato);
-            
-            // Hash de auditoría física basado únicamente en variables del sistema y candidato
-            String datosParaHash = candidato.getId() + "-" + System.currentTimeMillis();
-            nuevoVoto.setHashIntegridad(HashUtil.generarSHA512(datosParaHash));
-            
+            // B) Sellar metadatos y calcular hash criptográfico SHA-512
+            LocalDateTime horaActual = LocalDateTime.now();
+            String datosParaHash = candidatoId + "-" + ip + "-" + userAgent + "-" + horaActual.toString();
+            String hashUrna = HashUtil.generarSHA512(datosParaHash);
+
+            // C) Depositar sufragio inmutable de forma anónima en la urna
+            Voto nuevoVoto = new Voto(candidatoId, horaActual, ip, userAgent, hashUrna);
             votoRepository.save(nuevoVoto);
-            return new ApiResponse("Voto registrado con éxito", 200, candidato.getNombre());
             
-        }).orElseThrow(() -> new RuntimeException("El candidato no existe en el sistema."));
+            return new ApiResponse<>(true, "Voto registrado con éxito.", candidato.getNombre());
+            
+        }).orElseThrow(() -> new IllegalArgumentException("El candidato no existe en el sistema."));
     }
     
     @Override
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> obtenerResultados() {
-    // 1. Obtener todos los candidatos de la base de datos
-    List<com.sistema_votacion.app.models.Candidato> candidatos = candidatoRepository.findAll();
-    
-    // 2. Calcular el total acumulado de votos en el sistema para sacar los porcentajes
-    long totalVotosGlobales = votoRepository.count();
+        List<com.sistema_votacion.app.models.Candidato> candidatos = candidatoRepository.findAll();
+        long totalVotosGlobales = votoRepository.count();
 
-    // 3. Mapear cada candidato con sus estadísticas calculadas
-    return candidatos.stream().map(c -> {
-        Map<String, Object> resultado = new HashMap<>();
-        
-        long votosCandidato = votoRepository.countByCandidatoId(c.getId());
-        
-        resultado.put("id", c.getId()); 
-        resultado.put("nombre", c.getNombre());
-        resultado.put("votos", votosCandidato);
-        resultado.put("partidoPolitico", c.getPartidoPolitico());
-        resultado.put("fotoUrl", c.getFotoUrl());
-        
-        // Calcular el porcentaje matemático de forma segura (evitando división por cero)
-        double porcentaje = (totalVotosGlobales > 0) 
-            ? ((double) votosCandidato / totalVotosGlobales) * 100 
-            : 0.0;
+        return candidatos.stream().map(c -> {
+            Map<String, Object> resultado = new HashMap<>();
+            long votosCandidato = votoRepository.countByCandidatoId(c.getId());
             
-        // Redondear a un decimal (ej: 33.3)
-        resultado.put("porcentaje", Math.round(porcentaje * 10.0) / 10.0);
-        
-        return resultado;
-    }).collect(Collectors.toList());
-}
+            resultado.put("id", c.getId()); 
+            resultado.put("nombre", c.getNombre());
+            resultado.put("votos", votosCandidato);
+            resultado.put("partidoPolitico", c.getPartidoPolitico());
+            resultado.put("fotoUrl", c.getFotoUrl());
+            
+            double porcentaje = (totalVotosGlobales > 0) 
+                ? ((double) votosCandidato / totalVotosGlobales) * 100 
+                : 0.0;
+                
+            resultado.put("porcentaje", Math.round(porcentaje * 10.0) / 10.0);
+            
+            return resultado;
+        }).collect(Collectors.toList());
+    }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean verificarSiYaVoto(String documentoVotante) {
-    // Si usas el repositorio de votantes registrados:
-    return votanteRegistradoRepository.existsById(documentoVotante);
-    
-    // O si prefieres validar directo contra la existencia en la tabla votos:
-    // return votoRepository.existsByIdentificadorVotante(documentoVotante);
-}
+        return votanteRegistradoRepository.existsById(documentoVotante);
+    }
 }

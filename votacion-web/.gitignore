@@ -1,66 +1,52 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# ====================================================================
+# 1. SISTEMA OPERATIVO Y EDITORES (Limpieza del Entorno Local)
+# ====================================================================
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
+Thumbs.db
 *.sw?
+*.suo
 
-# --- JAVA / SPRING BOOT ---
-target/
-!.mvn/wrapper/maven-wrapper.jar
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-### IntelliJ IDEA ###
+# Configuraciones de editores e IDEs (IntelliJ, Eclipse, NetBeans)
 .idea/
 *.iws
 *.iml
 *.ipr
-### NetBeans ###
+.vscode/
 /nbproject/private/
+/.nb-gradle/
+.sts4-cache
+
+# ====================================================================
+# 2. ARCHIVOS DE LOGS Y TEMPORALES
+# ====================================================================
+*.log
+logs/
+
+# ====================================================================
+# 3. COMPILADOS Y HERRAMIENTAS DE CONSTRUCCIÓN (Java / Maven)
+# ====================================================================
+HELP.md
+*.class
+
+# Carpetas de salida de compilación
+target/
+/target/
+build/
 /build/
 /nbbuild/
 /dist/
 /nbdist/
-/.nb-gradle/
 
-# --- REACT / NODE (votacion-web) ---
-**/node_modules/
-**/dist/
-**/.env
-**/.env.local
-**/.env.development.local
-**/.env.test.local
-**/.env.production.local
+# Archivos temporales y metadatos específicos de IDEs
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
 
-# --- SISTEMA OPERATIVO Y VS CODE ---
-.vscode/
-.DS_Store
-Thumbs.db
-
-/target/
-.idea/
-.mvn/
-*.class
+# ====================================================================
+# 4. EXCEPCIONES EXPLICÍTAS
+# ====================================================================
+# Conservar el wrapper de Maven si lo usas para ejecutar ./mvnw spring-boot:run
+!.mvn/wrapper/maven-wrapper.jar
