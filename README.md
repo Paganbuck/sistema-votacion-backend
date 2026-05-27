@@ -1,4 +1,6 @@
-# Sistema de Votación Electrónico Corporativo
+
+
+# 🗳️ Sistema de Votación Electrónico Corporativo
 
 Plataforma web blindada para la gestión segura de elecciones y consultas corporativas en tiempo real. 
 Diseñada bajo un modelo full-stack desacoplado para garantizar la transparencia, el anonimato y la automatización del escrutinio general.
@@ -22,6 +24,19 @@ Diseñada bajo un modelo full-stack desacoplado para garantizar la transparencia
 
 ---
 
+## 🔑 Flujo de Acceso: ¿Cómo ingresar como Administrador?
+
+El sistema unifica el punto de entrada para mitigar vectores de ataque por exposición de rutas. El acceso se bifurca en el backend según el valor ingresado:
+
+* **Acceso Votante:** Ingrese cualquier documento de identidad válido (mínimo 6 dígitos). El sistema validará en el censo (`votante_registrado`) si la identificación ya sufragó. Si está limpio, habilita el tarjetón.
+
+
+* **Acceso Administrador (Auditoría y Gestión):** Para ingresar al panel de control y auditoría en tiempo real, el administrador debe iniciar sesión utilizando la identificación por defecto establecida en la base de datos: **`999999`**. El backend validará este código contra la tabla perimetral `administrador` y, tras conceder el acceso, desplegará de forma exclusiva la consola con dos funciones mayores:
+  1. **Contador en Tiempo Real:** Gráficas, porcentajes y barras de escrutinio que se actualizan de manera automática con cada voto registrado en la urna digital.
+  2. **Formulario de Candidatos:** Interfaz de entrada de datos para registrar nuevos candidatos en el sistema, asignándoles nombre, partido político y URL de recurso visual, los cuales se reflejan instantáneamente en el tarjetón público y la base de datos.
+
+---
+
 ## 💻 Stack Tecnológico
 
 * **Backend:** Java 17, Spring Boot, Maven, Spring Data JPA.
@@ -33,20 +48,32 @@ Diseñada bajo un modelo full-stack desacoplado para garantizar la transparencia
 ## 🏗️ Estructura del Repositorio
 
 ```text
-├── votacion-backend/          # API REST del servidor (Spring Boot)
-├── votacion-web/              # Interfaz de usuario (React + Vite)
-└── .gitignore                 # Filtro global unificado (Limpio)
+├── votacion-backend/        # API REST del servidor (Spring Boot)
+├── votacion-web/            # Interfaz de usuario (React + Vite)
+├── votacion_db.sql          # Script de estructura y datos de la BD (phpMyAdmin)
+└── .gitignore               # Filtro global unificado (Limpio)
 
----
+🚀 Despliegue Local Rápido
+1. Configuración de la Base de Datos (MySQL / phpMyAdmin)
+Abre phpMyAdmin y crea una base de datos llamada votacion_db.
 
----
+Selecciona la base de datos, ve a la pestaña Importar.
 
-## 🚀 Acceso a la Exhibición en Línea
+Elige el archivo votacion_db.sql ubicado en la raíz de este repositorio y haz clic en Continuar e Importar. Esto creará las tablas y cargará los candidatos iniciales.
 
-El sistema se encuentra totalmente desplegado y automatizado en la nube, por lo que **no requiere configuraciones locales, bases de datos manuales ni instalaciones** para su revisión.
+2. Levantar el Backend (Spring Boot)
+Abre una terminal en la raíz de la carpeta votacion-backend y ejecuta:
 
-* **Vista del Votante:** Ingrese cualquier documento de identidad válido (mínimo 6 dígitos). El sistema validará preventivamente si ya sufragó. El tarjetón es completamente ciego para garantizar la privacidad.
-* **Vista de Administrador (Auditoría):** Ingrese el código maestro exclusivo en el campo de identificación para saltar directamente al Panel de Control con las barras de progreso y porcentajes en tiempo real. El campo enmascara la clave para evitar espionaje visual.
+Bash
+./mvnw spring-boot:run
+El servidor backend se activará en el puerto 8080.
 
----
+3. Levantar el Frontend (React + Vite)
+Abre una segunda terminal en la carpeta votacion-web, instala los paquetes y enciende el entorno de desarrollo:
+
+Bash
+npm install
+npm run dev
+La interfaz web se desplegará en el puerto 5173. Abre http://localhost:5173 en tu navegador.
+
 Criptografía Homomórfica y Privacidad de Datos © 2026
