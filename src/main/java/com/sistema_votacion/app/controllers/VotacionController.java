@@ -60,6 +60,7 @@ public class VotacionController {
     // 3. RESULTADOS
     @GetMapping("/resultados")
     public ResponseEntity<List<Map<String, Object>>> verResultados() {
+
         return ResponseEntity.ok(votacionService.obtenerResultados());
     }
 
@@ -101,5 +102,11 @@ public class VotacionController {
             respuesta.put("mensaje", "Credenciales de administrador inválidas. Intento registrado.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(respuesta);
         }
+    }
+
+    // 6. LISTAR CANDIDATOS (El endpoint que te falta)
+    @GetMapping("/candidatos")
+    public ResponseEntity<List<Candidato>> listarCandidatos() {
+        return ResponseEntity.ok(candidatoRepository.findAll());
     }
 }

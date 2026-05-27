@@ -33,7 +33,7 @@ export default function Tarjeton({ candidatos, procesarVoto, cargando, regresarA
                   <img 
                     src={tieneFotoValida ? c.fotoUrl : imagenPorDefecto} 
                     alt={c.nombre}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-center"
                     onError={(e) => { e.target.src = imagenPorDefecto; }}
                   />
                 </div>
